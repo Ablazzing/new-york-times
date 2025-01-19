@@ -1,6 +1,7 @@
 package com.javacademy.new_york_times.service;
 
 import com.javacademy.new_york_times.dto.NewsDto;
+import com.javacademy.new_york_times.dto.PageDto;
 import com.javacademy.new_york_times.entity.NewsEntity;
 import com.javacademy.new_york_times.mapper.NewsMapper;
 import com.javacademy.new_york_times.repository.NewsRepository;
@@ -16,15 +17,28 @@ public class NewsService {
     private final NewsRepository newsRepository;
     private final NewsMapper newsMapper;
 
-    public void save(NewsDto dto) {
-        newsRepository.save(newsMapper.toEntity(dto));
+    public NewsDto save(NewsDto dto) {
+        return newsMapper.toDto(newsRepository.save(newsMapper.toEntity(dto)));
     }
 
     /**
      * Переписать этот метод
      */
-    public List<NewsDto> findAll() {
-        return newsMapper.toDtos(newsRepository.findAll());
+    public PageDto<NewsDto> findAll(int currentPage) {
+        List<NewsEntity> allEntities = newsRepository.findAll();
+        int allElementsCount = allEntities.size();
+        List<NewsDto> content = allEntities.stream()
+                .skip((currentPage - 1) * PageDto.DEFAULT_PAGE_SIZE)
+                .limit(PageDto.DEFAULT_PAGE_SIZE)
+                .map(newsMapper::toDto)
+                .toList();
+        return new PageDto<>(
+                    content,
+                    content.size(),
+                    allElementsCount / PageDto.DEFAULT_PAGE_SIZE,
+                    currentPage,
+                    PageDto.DEFAULT_PAGE_SIZE
+                );
     }
 
     public NewsDto findByNumber(Integer number) {

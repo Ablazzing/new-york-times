@@ -34,13 +34,14 @@ public class NewsRepository {
                 .build();
     }
 
-    public void save(NewsEntity entity) {
+    public NewsEntity save(NewsEntity entity) {
         if (entity.getNumber() != null) {
             throw new RuntimeException("News with number %s - already exists".formatted(entity.getNumber()));
         }
         entity.setNumber(counter.addAndGet(1));
 
         data.put(entity.getNumber(), entity);
+        return entity;
     }
 
     @SneakyThrows
